@@ -56,7 +56,7 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
-            tooltip: 'Save Shifts',
+            tooltip: 'Save',
             onPressed: _saveAll,
           ),
           const SizedBox(width: 8), // Give the icon a little breathing room
