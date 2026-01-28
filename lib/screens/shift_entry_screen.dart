@@ -13,7 +13,6 @@ class ShiftEntryScreen extends StatefulWidget {
 class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
   final StorageService _storage = StorageService();
   final Map<String, TextEditingController> _controllers = {};
-  // NEW: Store shift types as Strings instead of bools
   final Map<String, String> _shiftTypes = {}; 
 
   @override
@@ -30,7 +29,6 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
             : '',
       );
       
-      // Load the saved type (Ordinary, PM, AL, SL) or default to Ordinary
       _shiftTypes[key] = savedData['type'] ?? 'Ordinary';
     }
   }
@@ -40,7 +38,6 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
       double hours = double.tryParse(controller.text) ?? 0.0;
       String type = _shiftTypes[key] ?? 'Ordinary';
 
-      // FIX: Now sending the String 'type' instead of a bool
       _storage.saveShift(key, hours, type);
     });
 
@@ -53,7 +50,18 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Fortnight Shifts')),
+      appBar: AppBar(
+        title: const Text('Edit Fortnight Shifts'),
+        // ✅ Action moved to Top Right
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            tooltip: 'Save Shifts',
+            onPressed: _saveAll,
+          ),
+          const SizedBox(width: 8), // Give the icon a little breathing room
+        ],
+      ),
       body: ListView.builder(
         itemCount: 14,
         itemBuilder: (context, index) {
@@ -68,14 +76,20 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
                 children: [
                   Expanded(
                     flex: 2,
-                    child: Text(DateFormat('EEE, d MMM').format(date)),
+                    child: Text(
+                      DateFormat('EEE, d MMM').format(date),
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                   ),
                   Expanded(
                     flex: 1,
                     child: TextField(
                       controller: _controllers[key],
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(hintText: 'Hrs'),
+                      decoration: const InputDecoration(
+                        hintText: 'Hrs',
+                        isDense: true,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -84,6 +98,7 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
                     child: DropdownButton<String>(
                       value: _shiftTypes[key],
                       isExpanded: true,
+                      underline: Container(), // Cleans up the look inside the card
                       items: <String>['Ordinary', 'PM', 'AL', 'SL']
                           .map((String value) {
                         return DropdownMenuItem<String>(
@@ -104,14 +119,7 @@ class _ShiftEntryScreenState extends State<ShiftEntryScreen> {
           );
         },
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: ElevatedButton(
-          onPressed: _saveAll,
-          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-          child: const Text("SAVE AND FINISH"),
-        ),
-      ),
+      // ✅ Removed bottomNavigationBar for a cleaner UI
     );
   }
 }
